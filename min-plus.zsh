@@ -120,8 +120,8 @@ compose_rprompt() {
 PROMPT_COLOR=cyan
 [[ $UID -eq 0 ]] && PROMPT_COLOR=red
 
-PROMPT='%{$fg[$PROMPT_COLOR]%}$(shorten_path) $(exit_code_prompt) %{$reset_color%}%(!.#.>) '
-RPROMPT='$(compose_rprompt)'
+PROMPT="%{$fg[$PROMPT_COLOR]%}$(shorten_path) $(exit_code_prompt) %{$reset_color%}%(!.#.>) "
+RPROMPT="$(compose_rprompt)"
 
 # --- Hooks ---
 autoload -Uz add-zsh-hook
