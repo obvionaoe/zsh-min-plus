@@ -45,7 +45,7 @@ get_git_branch() {
   command -v git >/dev/null || return
   git rev-parse --is-inside-work-tree &>/dev/null || return
   local branch="$(git symbolic-ref --short HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null)"
-  [[ -n "$branch" ]] && echo " $branch"
+  [[ -n "$branch" ]] && echo "$branch"
 }
 
 # Exit code display (only if non-zero)
@@ -76,13 +76,13 @@ compose_rprompt() {
   [[ -n "$git" ]] && segments+=(" $git")
 
   local k8s="$(get_k8s_info)"
-  [[ -n "$k8s" ]] && segments+=("⎈ $k8s")
+  [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
 
   local aws="$(get_aws_profile)"
-  [[ -n "$aws" ]] && segments+=(" $aws")
+  [[ -n "$aws" ]] && segments+=(" $aws")
 
   local gcp="$(get_gcp_profile)"
-  [[ -n "$gcp" ]] && segments+=(" $gcp")
+  [[ -n "$gcp" ]] && segments+=("󱇶 $gcp")
 
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]"
 }
