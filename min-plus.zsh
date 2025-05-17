@@ -79,6 +79,7 @@ __async_git_prompt() {
 # --- Set GIT_PROMPT variable async ---
 __set_git_prompt() {
   GIT_PROMPT="$1"
+  zle && zle reset-prompt 2>/dev/null  # Force prompt redraw if possible
 }
 
 # --- Update git prompt async ---
@@ -120,9 +121,25 @@ compose_rprompt() {
 PROMPT_COLOR=cyan
 [[ $UID -eq 0 ]] && PROMPT_COLOR=red
 
-PROMPT="%{$fg[$PROMPT_COLOR]%}$(shorten_path) $(exit_code_prompt) %{$reset_color%}%(!.#.>) "
-RPROMPT="$(compose_rprompt)"
+compose_prompt() {
+  echo "%{$fg[$PROMPT_COLOR]%}$(shorten_path) $(exit_code_prompt) %{$reset_color%}%(!.#.>) "
+}
+
+compose_rprompt() {
+  local info=()
+  [[ -n "$GIT_PROMPT" ]] && info+=("$GIT_PROMPT")
+  [[ -n "$K8S_INFO" ]] && info+=("⎈ $K8S_INFO")
+  [[ -n "$AWS_PROFILE" ]] && info+=(" $AWS_PROFILE")
+  [[ -n "$GCP_PROFILE" ]] && info+=(" $GCP_PROFILE")
+  echo "${(j: | :)info}"
+}
+
+update_minplus_prompt() {
+  PROMPT="$(compose_prompt)"
+  RPROMPT="$(compose_rprompt)"
+}
 
 # --- Hooks ---
 autoload -Uz add-zsh-hook
 add-zsh-hook precmd update_git_prompt
+add-zsh-hook precmd update_minplus_prompt
