@@ -1,3 +1,6 @@
+# Load colors
+autoload -U colors && colors
+
 # Load async library (adjust path if needed)
 if [[ -z ${functions[async_start_worker]} ]]; then
   # You must have zsh-async installed somewhere; adjust this path accordingly
@@ -7,20 +10,25 @@ fi
 # Start async worker for git prompt
 async_start_worker gitprompt 2>/dev/null
 
-# --- Shorten path: keep 3 letters per dir ---
+# --- Shorten path: keep 3 letters per dir (except last) ---
 shorten_path() {
-  local keep=3
-  local dir="${PWD/#$HOME/~}"
-  local IFS='/' parts=(${(s:/:)dir})
-  local out=""
-  local i
+  local path="${PWD/#$HOME/~}"  # Replace $HOME with ~
+  local IFS='/' parts shortened
 
-  for (( i = 1; i < ${#parts[@]} - 1; i++ )); do
-    [[ -n ${parts[i]} ]] && out+="${parts[i]:0:$keep}/"
+  parts=(${(s:/:)path})
+  local last="${parts[-1]}"
+  unset 'parts[-1]'
+
+  shortened=""
+  for part in $parts; do
+    if [[ "$part" == "~" ]]; then
+      shortened="$part"
+    elif [[ -n "$part" ]]; then
+      shortened+="/${part[1,3]}"
+    fi
   done
 
-  out+="${parts[-1]}"
-  echo "$out"
+  echo "$shortened/$last"
 }
 
 # --- Get AWS profile ---
@@ -126,12 +134,19 @@ compose_prompt() {
 }
 
 compose_rprompt() {
-  local info=()
-  [[ -n "$GIT_PROMPT" ]] && info+=("$GIT_PROMPT")
-  [[ -n "$K8S_INFO" ]] && info+=("⎈ $K8S_INFO")
-  [[ -n "$AWS_PROFILE" ]] && info+=(" $AWS_PROFILE")
-  [[ -n "$GCP_PROFILE" ]] && info+=(" $GCP_PROFILE")
-  echo "${(j: | :)info}"
+  local segments=()
+
+  [[ -n "$GIT_PROMPT" ]] && segments+=("$GIT_PROMPT")
+
+  local k8s="$(get_k8s_info)"
+  [[ -n "$k8s" ]] && segments+=("⎈ $k8s")
+
+  [[ -n "$AWS_PROFILE" ]] && segments+=(" $AWS_PROFILE")
+  [[ -n "$GCP_PROFILE" ]] && segments+=(" $GCP_PROFILE")
+
+  print -u2 "k8s info: $k8s"
+
+  echo "${(j: | :)segments}"
 }
 
 update_minplus_prompt() {
