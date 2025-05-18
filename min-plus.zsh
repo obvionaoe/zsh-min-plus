@@ -51,6 +51,7 @@ shorten_path() {
   fi
 }
 
+shortened_path=''
 chpwd_functions+=(_update_shortened_path)
 _update_shortened_path() {
   shortened_path=$(shorten_path)
@@ -114,8 +115,6 @@ compose_rprompt() {
 
   local gcp="$(get_gcp_profile)"
   [[ -n "$gcp" ]] && segments+=("󱇶 $gcp")
-
-  local exit="$(exit_code_prompt)"
 
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]${exit}"
 }
