@@ -51,7 +51,7 @@ shorten_path() {
   fi
 }
 
-shortened_path="$PWD"
+shortened_path="$(shorten_path)"
 chpwd_functions+=(_update_shortened_path)
 _update_shortened_path() {
   shortened_path=$(shorten_path)
