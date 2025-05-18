@@ -126,5 +126,5 @@ _update_rprompt_segments() {
 
 PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
 
-PROMPT='%{$fg[$PROMPT_COLOR]%}$(shortened_path)%{$reset_color%} %(!.#.>) '
+PROMPT='%{$fg[$PROMPT_COLOR]%}${shortened_path}%{$reset_color%} %(!.#.>) '
 RPROMPT='${rprompt_segments}${exit_code}'
