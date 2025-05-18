@@ -108,11 +108,5 @@ compose_rprompt() {
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]${exit}"
 }
 
-
 PROMPT='$(shorten_path) %(!.#.>) '
 RPROMPT='$(compose_rprompt)'
-
-# --- Main prompt setup ---
-
-autoload -Uz vcs_info add-zsh-hook colors && colors
-add-zsh-hook precmd
