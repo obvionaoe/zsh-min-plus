@@ -19,7 +19,11 @@ zstyle ':vcs_info:*' max-exports 1
 # Refresh VCS info before prompt
 precmd_functions+=(_update_vcs_info)
 _update_vcs_info() {
-  vcs_info
+  if [[ -d .git || -n $(git rev-parse --git-dir 2>/dev/null) ]]; then
+    vcs_info
+  else
+    vcs_info_msg_0_=""
+  fi
 }
 
 # Path shortener: preserves ~ and shows full last directory
@@ -69,23 +73,19 @@ _update_shortened_path() {
 _min_has_gcloud=0
 (( $+commands[gcloud] )) && _min_has_gcloud=1
 
-gcp_profile() {
+# Refresh GCP profile before prompt
+precmd_functions+=(_update_gcp_profile)
+_update_gcp_profile() {
   [[ $_min_has_gcloud -ne 1 ]] && return
 
   local active_config
   active_config="$(<~/.config/gcloud/active_config 2>/dev/null)"
 
   if [[ "$active_config" != "default" ]]; then
-    MIN_GCP_PROFILE="$active_config"
+    MIN_GCP_PROFILE="󱇶 $active_config"
   else
     MIN_GCP_PROFILE=""
   fi
-}
-
-# Refresh GCP profile before prompt
-precmd_functions+=(_update_gcp_profile)
-_update_gcp_profile() {
-  gcp_profile
 }
 
 # Kubernetes context (cache commands availability)
@@ -94,13 +94,12 @@ _min_has_kubens=0
 (( $+commands[kubectx] )) && _min_has_kubectx=1
 (( $+commands[kubens] )) && _min_has_kubens=1
 
-get_k8s_info() {
-  local context namespace
-  [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || return
+precmd_functions+=(_update_k8s_info)
+_update_k8s_info() {
+  [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || context=""
   [[ $_min_has_kubens -eq 1 ]] && namespace=$(kubens -c 2>/dev/null) || namespace=""
   [[ -z "$namespace" ]] && namespace="default"
-
-  echo "$context:$namespace"
+  [[ -n "$context" ]] && MIN_K8S_INFO="󱃾 $context:$namespace"
 }
 
 # Exit code display (only if non-zero)
@@ -124,12 +123,11 @@ compose_rprompt() {
 
   [[ -n "$vcs_info_msg_0_" ]] && segments+=("$vcs_info_msg_0_")
 
-  local k8s="$(get_k8s_info)"
-  [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
+  [[ -n "$MIN_K8S_INFO" ]] && segments+=("$MIN_K8S_INFO")
 
   [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
 
-  [[ -n "$MIN_GCP_PROFILE" ]] && segments+=("󱇶 $MIN_GCP_PROFILE")
+  [[ -n "$MIN_GCP_PROFILE" ]] && segments+=("$MIN_GCP_PROFILE")
 
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]"
 }
