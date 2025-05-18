@@ -27,10 +27,17 @@ shorten_path() {
   local path="${PWD/#$HOME/~}"
   local IFS='/'
   local -a parts shortened_parts
-  local last shortened out
+  local last shortened
 
   parts=(${(s:/:)path})
   last="${parts[-1]}"
+
+  # If path is just ~ or has only one part, no shortening needed
+  if (( ${#parts} <= 1 )); then
+    echo "$path"
+    return
+  fi
+
   parts=(${parts[1,-2]})
 
   shortened_parts=()
@@ -50,6 +57,7 @@ shorten_path() {
     echo "$shortened/$last"
   fi
 }
+
 
 shortened_path="$(shorten_path)"
 chpwd_functions+=(_update_shortened_path)
@@ -108,13 +116,13 @@ compose_rprompt() {
   local git="${vcs_info_msg_0_}"
   [[ -n "$git" ]] && segments+=("$git")
 
-  local k8s="$(get_k8s_info)"
-  [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
+  # local k8s="$(get_k8s_info)"
+  # [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
 
-  [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
+  # [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
 
-  local gcp="$(get_gcp_profile)"
-  [[ -n "$gcp" ]] && segments+=("󱇶 $gcp")
+  # local gcp="$(get_gcp_profile)"
+  # [[ -n "$gcp" ]] && segments+=("󱇶 $gcp")
 
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]${exit}"
 }
