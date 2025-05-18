@@ -32,15 +32,14 @@ shorten_path() {
   parts=(${(s:/:)path})
   last="${parts[-1]}"
 
-  # If path is just ~ or has only one part, no shortening needed
   if (( ${#parts} <= 1 )); then
     echo "$path"
     return
   fi
 
   parts=(${parts[1,-2]})
-
   shortened_parts=()
+
   for part in $parts; do
     if [[ "$part" == "~" ]]; then
       shortened_parts+=("$part")
@@ -51,13 +50,14 @@ shorten_path() {
 
   shortened="${(j:/:)shortened_parts}"
 
-  if [[ "$shortened" == "~" ]]; then
-    echo "~"
+  if [[ -z "$shortened" ]]; then
+    echo "$last"
+  elif [[ "$shortened" == "~" ]]; then
+    echo "~/$last"
   else
     echo "$shortened/$last"
   fi
 }
-
 
 shortened_path="$(shorten_path)"
 chpwd_functions+=(_update_shortened_path)
@@ -69,10 +69,23 @@ _update_shortened_path() {
 _min_has_gcloud=0
 (( $+commands[gcloud] )) && _min_has_gcloud=1
 
-get_gcp_profile() {
-  if (( _min_has_gcloud )); then
-    gcloud config get-value account 2>/dev/null
+gcp_profile() {
+  [[ $_min_has_gcloud -ne 1 ]] && return
+
+  local active_config
+  active_config="$(<~/.config/gcloud/active_config 2>/dev/null)"
+
+  if [[ "$active_config" != "default" ]]; then
+    MIN_GCP_PROFILE="$active_config"
+  else
+    MIN_GCP_PROFILE=""
   fi
+}
+
+# Refresh GCP profile before prompt
+precmd_functions+=(_update_gcp_profile)
+_update_gcp_profile() {
+  gcp_profile
 }
 
 # Kubernetes context (cache commands availability)
@@ -83,15 +96,11 @@ _min_has_kubens=0
 
 get_k8s_info() {
   local context namespace
-  [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || context=""
+  [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || return
   [[ $_min_has_kubens -eq 1 ]] && namespace=$(kubens -c 2>/dev/null) || namespace=""
   [[ -z "$namespace" ]] && namespace="default"
 
-  if [[ -n "$context" ]]; then
-    echo "$context:$namespace"
-  else
-    echo ""
-  fi
+  echo "$context:$namespace"
 }
 
 # Exit code display (only if non-zero)
@@ -113,18 +122,16 @@ _update_exit_code() {
 compose_rprompt() {
   local segments=()
 
-  local git="${vcs_info_msg_0_}"
-  [[ -n "$git" ]] && segments+=("$git")
+  [[ -n "$vcs_info_msg_0_" ]] && segments+=("$vcs_info_msg_0_")
 
-  # local k8s="$(get_k8s_info)"
-  # [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
+  local k8s="$(get_k8s_info)"
+  [[ -n "$k8s" ]] && segments+=("󱃾 $k8s")
 
-  # [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
+  [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
 
-  # local gcp="$(get_gcp_profile)"
-  # [[ -n "$gcp" ]] && segments+=("󱇶 $gcp")
+  [[ -n "$MIN_GCP_PROFILE" ]] && segments+=("󱇶 $MIN_GCP_PROFILE")
 
-  [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]${exit}"
+  [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]"
 }
 
 precmd_functions+=(_update_rprompt_segments)
