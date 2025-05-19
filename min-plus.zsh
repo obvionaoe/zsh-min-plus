@@ -106,7 +106,7 @@ _update_k8s_info() {
 get_exit_code() {
   local last_status=$1
   if (( last_status != 0 )); then
-    echo " %F{red}${last_status}%f"
+    echo "%F{red}${last_status}%f "
   else
     echo ""
   fi
@@ -140,4 +140,4 @@ _update_rprompt_segments() {
 PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
 
 PROMPT='%{$fg[$PROMPT_COLOR]%}${shortened_path}%{$reset_color%} %(!.#.>) '
-RPROMPT='${rprompt_segments}${exit_code}'
+RPROMPT='${exit_code}${rprompt_segments}'
