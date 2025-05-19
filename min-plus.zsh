@@ -99,7 +99,7 @@ _update_k8s_info() {
   [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || context=""
   [[ $_min_has_kubens -eq 1 ]] && namespace=$(kubens -c 2>/dev/null) || namespace=""
   [[ -z "$namespace" ]] && namespace="default"
-  [[ -n "$context" ]] && MIN_K8S_INFO="󱃾 $context:$namespace"
+  [[ -n "$context" ]] && MIN_K8S_INFO="󱃾 $context:$namespace" || MIN_K8S_INFO=""
 }
 
 # Exit code display (only if non-zero)
