@@ -4,14 +4,14 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git
 
 # Git branch + color-coded status indicators
-zstyle ':vcs_info:git:*' formats       '%F{cyan}%f %b %c%u%m'
-zstyle ':vcs_info:git:*' actionformats '%F{cyan}%f %b|%a %c%u%m'
+zstyle ':vcs_info:git:*' formats       '%F{cyan}%f %b%c%u%m'
+zstyle ':vcs_info:git:*' actionformats '%F{cyan}%f %b|%a%c%u%m'
 
 # Enable change detection
 zstyle ':vcs_info:git:*' check-for-changes true
-zstyle ':vcs_info:git:*' stagedstr    '%F{green}●%f'
-zstyle ':vcs_info:git:*' unstagedstr  '%F{yellow}✚%f'
-zstyle ':vcs_info:git:*' untrackedstr '%F{red}…%f'
+zstyle ':vcs_info:git:*' stagedstr    ' %F{green}●%f'
+zstyle ':vcs_info:git:*' unstagedstr  ' %F{yellow}✚%f'
+zstyle ':vcs_info:git:*' untrackedstr ' %F{red}…%f'
 
 # Only use one message slot
 zstyle ':vcs_info:*' max-exports 1
