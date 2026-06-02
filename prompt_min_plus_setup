@@ -12,8 +12,8 @@ prompt_min_plus_setup() {
     zstyle ':vcs_info:*' max-exports 1
 
     precmd_functions+=(_update_vcs_info)
-    precmd_functions+=(%{$fg[yellow]%}\${_update_gcp_profile}%{$reset_color%})
-    precmd_functions+=(%{$fg[blue]%}\${_update_k8s_info}%{$reset_color%})
+    precmd_functions+=(_update_gcp_profile)
+    precmd_functions+=(_update_k8s_info)
     precmd_functions+=(_update_exit_code)
     precmd_functions+=(_update_rprompt_segments)
     chpwd_functions+=(_update_shortened_path)
@@ -82,14 +82,14 @@ _update_gcp_profile() {
   [[ $_min_has_gcloud -ne 1 ]] && return
   local active_config
   active_config="$(<~/.config/gcloud/active_config 2>/dev/null)"
-  [[ "$active_config" != "default" ]] && MIN_GCP_PROFILE="󱇶 $active_config" || MIN_GCP_PROFILE=""
+  [[ "$active_config" != "default" ]] && MIN_GCP_PROFILE="%F{red}󱇶 $active_config%f" || MIN_GCP_PROFILE=""
 }
 
 _update_k8s_info() {
   [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || context=""
   [[ $_min_has_kubens -eq 1 ]] && namespace=$(kubens -c 2>/dev/null) || namespace=""
   [[ -z "$namespace" ]] && namespace="default"
-  [[ -n "$context" ]] && MIN_K8S_INFO="󱃾 $context:$namespace" || MIN_K8S_INFO=""
+  [[ -n "$context" ]] && MIN_K8S_INFO="%F{blue}󱃾 $context:$namespace%f" || MIN_K8S_INFO=""
 }
 
 get_exit_code() {
