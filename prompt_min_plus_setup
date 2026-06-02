@@ -1,5 +1,6 @@
 prompt_min_plus_setup() {
     autoload -Uz vcs_info
+    autoload -Uz colors && colors
 
     zstyle ':vcs_info:*' enable git
     zstyle ':vcs_info:git:*' formats       '%F{cyan}%f %b%c%u%m'
@@ -25,9 +26,6 @@ prompt_min_plus_setup() {
     (( $+commands[kubens] )) && _min_has_kubens=1
 
     shortened_path="$(shorten_path)"
-
-    autoload -Uz colors && colors
-    setopt PROMPT_SUBST
 
     PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
     PROMPT="%{$fg[$PROMPT_COLOR]%}\${shortened_path}%{$reset_color%} %(!.#.>) "
@@ -111,5 +109,7 @@ compose_rprompt() {
 }
 
 _update_rprompt_segments() { rprompt_segments="$(compose_rprompt)" }
+
+setopt PROMPT_SUBST
 
 prompt_min_plus_setup "$@"
