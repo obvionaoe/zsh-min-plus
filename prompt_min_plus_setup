@@ -103,7 +103,7 @@ compose_rprompt() {
   local segments=()
   [[ -n "$vcs_info_msg_0_" ]] && segments+=("$vcs_info_msg_0_")
   [[ -n "$MIN_K8S_INFO" ]] && segments+=("$MIN_K8S_INFO")
-  [[ -n "$AWS_PROFILE" ]] && segments+=(" $AWS_PROFILE")
+  [[ -n "$AWS_PROFILE" ]] && segments+=("  $AWS_PROFILE")
   [[ -n "$MIN_GCP_PROFILE" ]] && segments+=("$MIN_GCP_PROFILE")
   [[ $#segments -gt 0 ]] && echo "[ ${(j: | :)segments} ]"
 }
