@@ -137,7 +137,11 @@ _update_rprompt_segments() {
   rprompt_segments="$(compose_rprompt)"
 }
 
-PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
+prompt_min-plus_setup() {
+    PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
 
-PROMPT='%{$fg[$PROMPT_COLOR]%}${shortened_path}%{$reset_color%} %(!.#.>) '
-RPROMPT='${exit_code}${rprompt_segments}'
+    PROMPT='%{$fg[$PROMPT_COLOR]%}${shortened_path}%{$reset_color%} %(!.#.>) '
+    RPROMPT='${exit_code}${rprompt_segments}'
+}
+
+prompt_min-plus_setup "$@"
