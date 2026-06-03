@@ -3,8 +3,8 @@ prompt_min_plus_setup() {
     autoload -Uz colors && colors
 
     zstyle ':vcs_info:*' enable git
-    zstyle ':vcs_info:git:*' formats       '%F{cyan}%f %b%c%u%m'
-    zstyle ':vcs_info:git:*' actionformats '%F{cyan}%f %b|%a%c%u%m'
+    zstyle ':vcs_info:git:*' formats       '%F{cyan}%f󰊢 %b%c%u%m'
+    zstyle ':vcs_info:git:*' actionformats '%F{cyan}%f󰊢 %b|%a%c%u%m'
     zstyle ':vcs_info:git:*' check-for-changes true
     zstyle ':vcs_info:git:*' stagedstr    ' %F{green}●%f'
     zstyle ':vcs_info:git:*' unstagedstr  ' %F{yellow}✚%f'
