@@ -86,10 +86,12 @@ _update_gcp_profile() {
 }
 
 _update_k8s_info() {
+  echo "kubectx: $_min_has_kubectx, kubens: $_min_has_kubens"
   [[ $_min_has_kubectx -eq 1 ]] && context=$(kubectx -c 2>/dev/null) || context=""
   [[ $_min_has_kubens -eq 1 ]] && namespace=$(kubens -c 2>/dev/null) || namespace=""
+  echo "context: $context, namespace: $namespace"
   [[ -z "$namespace" ]] && namespace="default"
-  [[ -n "$context" ]] && MIN_K8S_INFO="%F{blue}󱃾 $context:$namespace%f" || MIN_K8S_INFO=""
+  [[ -n "$context" ]] && MIN_K8S_INFO=" $context:$namespace" || MIN_K8S_INFO=""
 }
 
 get_exit_code() {
