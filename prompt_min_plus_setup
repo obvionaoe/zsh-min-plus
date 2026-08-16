@@ -80,8 +80,9 @@ shorten_path() {
 _update_shortened_path() { shortened_path=$(shorten_path) }
 _update_gcp_profile() {
   [[ $_min_has_gcloud -ne 1 ]] && return
+  [[ -r ~/.config/gcloud/active_config ]] || return
   local active_config
-  active_config="$(<~/.config/gcloud/active_config 2>/dev/null)"
+  active_config="$(<~/.config/gcloud/active_config)"
   [[ "$active_config" != "default" ]] && MIN_GCP_PROFILE="%F{red}󱇶 $active_config%f" || MIN_GCP_PROFILE=""
 }
 
