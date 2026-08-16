@@ -33,12 +33,48 @@ prompt_min_plus_setup() {
 }
 
 # Helper functions defined outside (they need to be available at runtime)
-_update_vcs_info() {
+#
+# _update_vcs_info is reassigned near the bottom of this file, once we know
+# whether the zsh-async worker started — see the block after
+# `prompt_min_plus_setup "$@"`. Both variants are defined up front since
+# zsh-async requires job functions to exist before the worker forks.
+_update_vcs_info_sync() {
   if [[ -d .git || -n $(git rev-parse --git-dir 2>/dev/null) ]]; then
     vcs_info
   else
     vcs_info_msg_0_=""
   fi
+}
+_update_vcs_info() { _update_vcs_info_sync }
+
+# The async job: runs in a forked worker, so it has its own independent PWD
+# — cd into the directory the dispatcher captured rather than relying on
+# inherited state. Directory and message share one line, joined by a control
+# character rather than a newline: job output is captured through a
+# mechanism that strips trailing newlines, so an empty message (not a repo)
+# would silently swallow the delimiter and corrupt the parse below.
+_min_plus_async_vcs_info() {
+  emulate -L zsh
+  cd -q "$1" || return
+  if [[ -d .git || -n $(git rev-parse --git-dir 2>/dev/null) ]]; then
+    vcs_info
+  else
+    vcs_info_msg_0_=""
+  fi
+  print -r -- "$1"$'\x01'"$vcs_info_msg_0_"
+}
+
+_min_plus_async_callback() {
+  local job=$1 output=$3
+  [[ $job == _min_plus_async_vcs_info ]] || return
+  local for_dir=${output%%$'\x01'*} msg=${output#*$'\x01'}
+  [[ $for_dir == $PWD ]] || return
+  vcs_info_msg_0_=$msg
+  zle && zle reset-prompt
+}
+
+_update_vcs_info_async() {
+  async_job min_plus_git _min_plus_async_vcs_info "$PWD"
 }
 
 shorten_path() {
@@ -118,3 +154,23 @@ _update_rprompt_segments() { rprompt_segments="$(compose_rprompt)" }
 setopt PROMPT_SUBST
 
 prompt_min_plus_setup "$@"
+
+# Move vcs_info off the prompt's critical path: with `check-for-changes true`
+# (set above) it shells out to check dirty/staged/untracked state on every
+# precmd, which is cheap on a small repo but a real stall on a large one.
+# Requires zsh-async (github.com/mafredri/zsh-async) already sourced by the
+# consumer — this repo doesn't bundle it, matching how this file already
+# expects vcs_info itself to come from zsh's own distribution. Falls back to
+# the synchronous path (_update_vcs_info_sync, defined above, unchanged
+# behavior) if the worker can't start for any reason, rather than silently
+# losing the git segment.
+if (( $+functions[async_start_worker] )); then
+  # Forces vcs_info's autoload body to actually load in *this* process
+  # before the fork below — the worker inherits function definitions as of
+  # fork time, and an unresolved autoload stub forks as "command not found".
+  vcs_info
+  if async_start_worker min_plus_git -u -n 2>/dev/null; then
+    async_register_callback min_plus_git _min_plus_async_callback
+    _update_vcs_info() { _update_vcs_info_async }
+  fi
+fi
