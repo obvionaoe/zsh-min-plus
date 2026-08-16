@@ -77,9 +77,10 @@ _min_has_gcloud=0
 precmd_functions+=(_update_gcp_profile)
 _update_gcp_profile() {
   [[ $_min_has_gcloud -ne 1 ]] && return
+  [[ -r ~/.config/gcloud/active_config ]] || return
 
   local active_config
-  active_config="$(<~/.config/gcloud/active_config 2>/dev/null)"
+  active_config="$(<~/.config/gcloud/active_config)"
 
   if [[ "$active_config" != "default" ]]; then
     MIN_GCP_PROFILE="󱇶 $active_config"
