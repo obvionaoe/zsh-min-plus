@@ -29,7 +29,7 @@ prompt_min_plus_setup() {
 
     PROMPT_COLOR=cyan; [ $UID -eq 0 ] && PROMPT_COLOR=red
     PROMPT="%{$fg[$PROMPT_COLOR]%}\${shortened_path}%{$reset_color%} %(!.#.>) "
-    RPROMPT="\${exit_code}\${rprompt_segments}"
+    RPS1="\${exit_code}\${rprompt_segments}"
 }
 
 # Helper functions defined outside (they need to be available at runtime)
