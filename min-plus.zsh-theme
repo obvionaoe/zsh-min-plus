@@ -70,6 +70,12 @@ _min_plus_async_callback() {
   local for_dir=${output%%$'\x01'*} msg=${output#*$'\x01'}
   [[ $for_dir == $PWD ]] || return
   vcs_info_msg_0_=$msg
+  # RPS1 reads $rprompt_segments (composed by _update_rprompt_segments, a
+  # separate precmd hook), not $vcs_info_msg_0_ directly — recompute it here
+  # too, or `zle reset-prompt` just redraws with whatever it already held
+  # from before this result arrived, and the new git segment doesn't show
+  # until the next full precmd cycle.
+  _update_rprompt_segments
   zle && zle reset-prompt
 }
 
